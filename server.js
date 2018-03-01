@@ -8,6 +8,7 @@
 var fs = require('fs');
 var express = require('express');
 var app = express();
+var moment = require('moment');
 
 if (!process.env.DISABLE_XORIGIN) {
   app.use(function(req, res, next) {
@@ -37,6 +38,27 @@ app.route('/')
     .get(function(req, res) {
 		  res.sendFile(process.cwd() + '/views/index.html');
     })
+//solution: returns the date
+app.get('/:time', function(req, res) {
+  var date = req.params.time;
+  
+  if(/\d{10,}$/.test(date)){ //test() is javascript regex function
+    date = moment(date, "X")
+  } else {
+    date = moment(date, "MMMM D, YYYY")
+  }
+  if(date.isValid()){
+    res.json({
+      unix: date.format("X"),
+      natural: date.format("MMMM D, YYYY")
+    })
+  } else {
+    res.json({
+      unix: null,
+      natural: null
+    })
+  }
+})
 
 // Respond not found to all the wrong routes
 app.use(function(req, res, next){
